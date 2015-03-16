@@ -1,0 +1,9 @@
+{
+    "path" : "~/Documents/github/lego-pricing/brickset",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}

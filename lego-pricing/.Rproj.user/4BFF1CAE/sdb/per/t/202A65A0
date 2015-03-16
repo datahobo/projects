@@ -1,0 +1,22 @@
+{
+    "contents" : "",
+    "created" : 1426277973168.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "202A65A0",
+    "lastKnownWriteTime" : 4294967296,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "caption" : "setsByYear2",
+        "contentUrl" : "content?title=setsByYear2&file=da5b8ed897844951a40cbe3f90874e3d.htm",
+        "displayedObservations" : 1,
+        "displayedVariables" : 32,
+        "totalObservations" : 1,
+        "variables" : 32
+    },
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}
