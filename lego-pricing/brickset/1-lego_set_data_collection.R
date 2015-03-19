@@ -1,96 +1,29 @@
-# We're going to get all the parts lists for all the lego sets from the site brickset.com
-# Here's a sample URL: http://brickset.com/sets/theme-Action-Wheelers
-# http://brickset.com/sets/category-Normal/page-41
-# http://brickset.com/sets/year-1999
-# http://brickset.com/sets/2904-1/Motorbike
-# Note, all you need is the setID in the URL.
+# We're going to get the lists of sets from the brickset API
 rm(list = ls())
-# Here are the packages that you'll need:
+# Here are the packages that you'll need: ----
 library(XML)
 library(stringr)
 library(RCurl)
 library(plyr)
+
+# set initial parameters ----
 api.url <- "http://brickset.com/api/v2.asmx/"
 api.key <- "IDzN-C1HU-99ud"
 uname <- "waketheman"
 pword <- "serptin7"
 
-
-u.hash <- getBricksetHashFromLogin(api.url, api.key, uname, pword)
-rm(uname, pword)
-
-year <- 2014
-sets2014 <- getBricksetSetsByYear(api.url, api.key, u.hash, year = 2014)
-
-# some troubleshooting for i = 13 ----
-setsByYear <- NULL
-for (i in 1:245) {
-  temp <- getBricksetSetList(api.url, api.key, u.hash, year = 2014, pageNumber = i)
-  setsByYear <- rbind(setsByYear, temp)
-}
-
-# 121 is the equivalent to the first two on page 13
-i <- 246
-temp <- getBricksetSetList(api.url, api.key, u.hash, 
-                                  year = 2014,
-                                  pageSize = 1,
-                                  pageNumber = i)
-setsByYear$amp <- str_detect(setsByYear$name, "&")
-table(setsByYear$amp)
-setsByYear <- arrange(setsByYear, desc(setsByYear$amp))
-
-getBricksetSetsByYear <- function (api.url, api.key, u.hash, year) {
-# assumes that there is at least one set in the request
-  i <- 1
-  # start with the first one
-  setsByYear <- getBricksetSetList(api.url, api.key, u.hash, year, pageNumber = i)
-  # if the function doesn't return false, there are more sets to get
-  moreSets <- !is.logical(setsByYear)
-  # keep going...
-  while (moreSets) {
-    i <- i + 1
-    temp <- getBricksetSetList(api.url, api.key, u.hash, year, pageNumber = i)
-    # if the function returns false, we've hit the end of the list
-    if (is.logical(temp)) {
-      moreSets <- FALSE
-    } else {
-      # Let's fix these so they have the same variables in the same order
-      # are they different lengths?
-      if (length(names(setsByYear)) > length(names(temp))) {
-        # the temp list is shorter (assume it has a subset of the variables) 
-        # in the setsByYear list
-        colsToAdd <- setdiff(names(setsByYear), names(temp))
-        for (i in 1:length(colsToAdd)) {
-          # add another column, and set it's value to NA
-          temp[1, ncol(temp) + 1] <- NA
-          # name the last column in the df (the one just added)
-          # with the name of the next item in the array
-          names(temp)[ncol(temp)] <- colsToAdd[i]
-        }
-      }
-      if (length(names(temp)) > length(names(setsByYear))) {
-        # the setsByYear list is shorter (assume it has a subset of the variables) 
-        # in the temp list
-        colsToAdd <- setdiff(names(temp), names(setsByYear))
-        for (i in 1:length(colsToAdd)) {
-          # add another column, and set it's value to NA
-          setsByYear[1, ncol(setsByYear) + 1] <- NA
-          # name the last column in the df (the one just added)
-          # with the name of the next item in the array
-          names(setsByYear)[ncol(setsByYear)] <- colsToAdd[i]
-        }
-      }
-      # now they are the same length
-      # do they have elements in the same order?
-      if (mean(as.numeric(names(setsByYear) == names(temp))) != 1) {
-        # if not, put them in the same order
-        temp <- temp[names(setsByYear)]
-      }
-      # now they have the same length, and are in the same order
-      setsByYear <- rbind(setsByYear, temp)
-    }
-  }
-  return(setsByYear)
+getBricksetHashFromLogin <- function (api.url, api.key, uname, pword) {
+  param.login <- "login?"
+  params.key <- paste("apiKey=", api.key, sep = "")
+  login.url <- paste(api.url, param.login, params.key, sep = "")
+  params.uname <- paste("username=", uname, sep = "")
+  params.pword <- paste("password=", pword, sep = "")
+  login.string <- paste(login.url, params.uname, params.pword, sep = "&")
+  u.hash.xml <- xmlInternalTreeParse(getURL(login.string))
+  # login works!!
+  # now extract the hash ----
+  u.hash <- xmlValue(xmlRoot(u.hash.xml)[[1]])
+  return(u.hash)
 }
 
 getBricksetSetList <- 
@@ -152,17 +85,66 @@ getBricksetSetList <-
     return (sets)
   }
 
-getBricksetHashFromLogin <- function (api.url, api.key, uname, pword) {
-  param.login <- "login?"
-  params.key <- paste("apiKey=", api.key, sep = "")
-  login.url <- paste(api.url, param.login, params.key, sep = "")
-  params.uname <- paste("username=", uname, sep = "")
-  params.pword <- paste("password=", pword, sep = "")
-  login.string <- paste(login.url, params.uname, params.pword, sep = "&")
-  u.hash.xml <- xmlInternalTreeParse(getURL(login.string))
-  # login works!!
-  # now extract the hash ----
-  u.hash <- xmlValue(xmlRoot(u.hash.xml)[[1]])
-  return(u.hash)
+getBricksetSetsByYear <- function (api.url, api.key, u.hash, year) {
+  # assumes that there is at least one set in the request
+  i <- 1
+  # start with the first one
+  setsByYear <- getBricksetSetList(api.url, api.key, u.hash, year, pageNumber = i)
+  # if the function doesn't return false, there are more sets to get
+  moreSets <- !is.logical(setsByYear)
+  # keep going...
+  while (moreSets) {
+    i <- i + 1
+    temp <- getBricksetSetList(api.url, api.key, u.hash, year, pageNumber = i)
+    # if the function returns false, we've hit the end of the list
+    if (is.logical(temp)) {
+      moreSets <- FALSE
+    } else {
+      # Let's fix these so they have the same variables in the same order
+      # are they different lengths?
+      if (length(names(setsByYear)) > length(names(temp))) {
+        # the temp list is shorter (assume it has a subset of the variables) 
+        # in the setsByYear list
+        colsToAdd <- setdiff(names(setsByYear), names(temp))
+        for (i in 1:length(colsToAdd)) {
+          # add another column, and set it's value to NA
+          temp[1, ncol(temp) + 1] <- NA
+          # name the last column in the df (the one just added)
+          # with the name of the next item in the array
+          names(temp)[ncol(temp)] <- colsToAdd[i]
+        }
+      }
+      if (length(names(temp)) > length(names(setsByYear))) {
+        # the setsByYear list is shorter (assume it has a subset of the variables) 
+        # in the temp list
+        colsToAdd <- setdiff(names(temp), names(setsByYear))
+        for (i in 1:length(colsToAdd)) {
+          # add another column, and set it's value to NA
+          setsByYear[1, ncol(setsByYear) + 1] <- NA
+          # name the last column in the df (the one just added)
+          # with the name of the next item in the array
+          names(setsByYear)[ncol(setsByYear)] <- colsToAdd[i]
+        }
+      }
+      # now they are the same length
+      # do they have elements in the same order?
+      if (mean(as.numeric(names(setsByYear) == names(temp))) != 1) {
+        # if not, put them in the same order
+        temp <- temp[names(setsByYear)]
+      }
+      # now they have the same length, and are in the same order
+      setsByYear <- rbind(setsByYear, temp)
+      print(i)
+    }
+  }
+  return(setsByYear)
 }
+
+# get the hash that we need for the api ----
+u.hash <- getBricksetHashFromLogin(api.url, api.key, uname, pword)
+rm(uname, pword)
+
+# Now get a full set of data for 2014 - note, this will take a while... ----
+year <- 2014
+sets2014 <- getBricksetSetsByYear(api.url, api.key, u.hash, year = 2014)
 
