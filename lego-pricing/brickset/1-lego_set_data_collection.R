@@ -85,9 +85,13 @@ getBricksetSetList <-
     return (sets)
   }
 
+
 getBricksetSetsByYear <- function (api.url, api.key, u.hash, year) {
   # assumes that there is at least one set in the request
   i <- 1
+  # testing
+  setsByYear <- NULL
+  temp <- NULL
   # start with the first one
   setsByYear <- getBricksetSetList(api.url, api.key, u.hash, year, pageNumber = i)
   # if the function doesn't return false, there are more sets to get
@@ -106,24 +110,24 @@ getBricksetSetsByYear <- function (api.url, api.key, u.hash, year) {
         # the temp list is shorter (assume it has a subset of the variables) 
         # in the setsByYear list
         colsToAdd <- setdiff(names(setsByYear), names(temp))
-        for (i in 1:length(colsToAdd)) {
+        for (j in 1:length(colsToAdd)) {
           # add another column, and set it's value to NA
           temp[1, ncol(temp) + 1] <- NA
           # name the last column in the df (the one just added)
           # with the name of the next item in the array
-          names(temp)[ncol(temp)] <- colsToAdd[i]
+          names(temp)[ncol(temp)] <- colsToAdd[j]
         }
       }
       if (length(names(temp)) > length(names(setsByYear))) {
         # the setsByYear list is shorter (assume it has a subset of the variables) 
         # in the temp list
         colsToAdd <- setdiff(names(temp), names(setsByYear))
-        for (i in 1:length(colsToAdd)) {
+        for (k in 1:length(colsToAdd)) {
           # add another column, and set it's value to NA
           setsByYear[1, ncol(setsByYear) + 1] <- NA
           # name the last column in the df (the one just added)
           # with the name of the next item in the array
-          names(setsByYear)[ncol(setsByYear)] <- colsToAdd[i]
+          names(setsByYear)[ncol(setsByYear)] <- colsToAdd[k]
         }
       }
       # now they are the same length
@@ -134,7 +138,6 @@ getBricksetSetsByYear <- function (api.url, api.key, u.hash, year) {
       }
       # now they have the same length, and are in the same order
       setsByYear <- rbind(setsByYear, temp)
-      print(i)
     }
   }
   return(setsByYear)
@@ -147,4 +150,19 @@ rm(uname, pword)
 # Now get a full set of data for 2014 - note, this will take a while... ----
 year <- 2014
 sets2014 <- getBricksetSetsByYear(api.url, api.key, u.hash, year = 2014)
-
+# next for 2013
+sets2013 <- getBricksetSetsByYear(api.url, api.key, u.hash, year = 2013)
+# make sure the columns are in the right order
+sets2013 <- sets2013[names(sets2014)]
+# merge them
+setsByYear <- rbind(sets2014, sets2013)
+# clean it up
+rm(sets2013, sets2014)
+# now loop for the rest
+for (y in seq(2012, 1970, -1)) {
+  temp <- getBricksetSetsByYear(api.url, api.key, u.hash, year = y)
+  temp <- temp[names(setsByYear)]
+  setsByYear <- rbind(setsByYear, temp)
+  # hopefully this will set it up to update the environment with data...
+  print(y)
+}
