@@ -142,6 +142,7 @@ getBricksetSetsByYear <- function (api.url, api.key, u.hash, year) {
   }
   return(setsByYear)
 }
+rm(colsToAdd)
 
 # get the hash that we need for the api ----
 u.hash <- getBricksetHashFromLogin(api.url, api.key, uname, pword)
@@ -155,7 +156,7 @@ sets2013 <- getBricksetSetsByYear(api.url, api.key, u.hash, year = 2013)
 # make sure the columns are in the right order
 sets2013 <- sets2013[names(sets2014)]
 # merge them
-setsByYear <- rbind(sets2014, sets2013)
+brickSets <- rbind(sets2014, sets2013)
 # clean it up
 rm(sets2013, sets2014)
 # now loop for the rest
@@ -163,11 +164,12 @@ for (y in seq(1969, 1960, -1)) {
   # get the set
   temp <- getBricksetSetsByYear(api.url, api.key, u.hash, year = y)
   # order the columns the same way as the current one
-  temp <- temp[names(setsByYear)]
+  temp <- temp[names(brickSets)]
   # now merge them
-  setsByYear <- rbind(setsByYear, temp)
+  brickSets <- rbind(brickSets, temp)
   # hopefully this will set it up to update the environment with data...
   print(y)
 }
-table(setsByYear$year)
-write.csv(setsByYear, "setsByYear.csv")
+rm(y, temp)
+table(brickSets$year)
+write.csv(brickSets, "brickSets.csv")

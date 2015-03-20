@@ -87,8 +87,8 @@ dfr_cleanPeeronSetList <- function (setList) {
   return(setList)  
 }
 # Now we move onto the interesting part, grabbing the list of all the sets...
-setsList <- NULL
-for(i in 1:48) {
+peeronSets <- NULL
+for(i in 1:88) {
   # for(i in 1:1) {
   # There are 48 pages of sets that have prices
   # First we get a URL
@@ -96,23 +96,13 @@ for(i in 1:48) {
   # Then download that page
   listPage <- readHTMLTable(listURL, header = TRUE)
   # Put the right table into a dataframe
-  setList <- NULL
-  setList <- as.data.frame(listPage[2])
+  peeronSetsList <- NULL
+  peeronSetsList <- as.data.frame(listPage[2])
   # Now clean up the table
-  setList <- dfr_cleanedPeeronSetListForMerge(setList)
+  peeronSetsList <- dfr_cleanPeeronSetList(peeronSetsList)
   # Now all we need is a merging function...
-  setsList <- rbind(setList, setsList)
+  peeronSets <- rbind(peeronSets, peeronSetsList)
 }
+rm(i, listURL, listPage, peeronSetsList)
 
-
-
-# The next step will be to actually build a parts list from the set list. That will be a lot more useful...
-partsList <- NULL
-for(i in nrow(setsList):1) {
-  # Now we can test the new function
-  if(setsList$Pcs[i] > 2) {
-    tempPartsList <- dfr_peeronPartsList(setsList$SetID[i])
-    partsList <- rbind(tempPartsList, partsList)
-  }
-}
-
+write.csv(peeronSets, "peeronSets.csv")
