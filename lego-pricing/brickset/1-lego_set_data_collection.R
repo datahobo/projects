@@ -159,12 +159,15 @@ setsByYear <- rbind(sets2014, sets2013)
 # clean it up
 rm(sets2013, sets2014)
 # now loop for the rest
-for (y in seq(1997, 1970, -1)) {
+for (y in seq(1969, 1960, -1)) {
+  # get the set
   temp <- getBricksetSetsByYear(api.url, api.key, u.hash, year = y)
+  # order the columns the same way as the current one
   temp <- temp[names(setsByYear)]
+  # now merge them
   setsByYear <- rbind(setsByYear, temp)
   # hopefully this will set it up to update the environment with data...
   print(y)
 }
-
+table(setsByYear$year)
 write.csv(setsByYear, "setsByYear.csv")
