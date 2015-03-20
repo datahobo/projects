@@ -171,5 +171,11 @@ for (y in seq(1969, 1960, -1)) {
   print(y)
 }
 rm(y, temp)
-table(brickSets$year)
+# let's clean up the data
 write.csv(brickSets, "brickSets.csv")
+brickSets <- read.csv("brickSets.csv")
+
+str(brickSets)
+
+
+
