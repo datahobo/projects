@@ -39,17 +39,25 @@ dfr_cleanPeeronPartsList <- function (partsList) {
 
 # Let's create a function to get all the parts from a parts list
 dfr_peeronPartsList <- function (setIDString) {
+  # print(paste("Running", setIDString))
   # Define the URL we're going to get
   setURL <- str_peeronPartsListURL(setIDString)
   # Now pull the page into an R object
   setPartsListPage <- readHTMLTable(setURL)  
   # Convert it to a data frame - the last table in the list should be what we want
   setPartsList <- as.data.frame(setPartsListPage[length(setPartsListPage)])
-  # Add the setNumber to the data frame
-  setPartsList$SetID <- setIDString  
-  # Use the function to clean the data frame
-  setPartsList <- dfr_cleanPeeronPartsList(setPartsList)
-  return(setPartsList)
+  # if it's a valid setAdd the setNumber to the data frame
+  validSet <- (length(setPartsList) > 1 &
+                 names(setPartsList)[1] != "NULL.V1")
+  if(validSet) {
+    setPartsList$SetID <- setIDString  
+    # Use the function to clean the data frame
+    setPartsList <- dfr_cleanPeeronPartsList(setPartsList)
+    # print(paste("Cleaned", setIDString))
+    return(setPartsList)
+  } else {
+    return(NA)
+  }
 }
 
 # Let's use paste because it's part of the base package

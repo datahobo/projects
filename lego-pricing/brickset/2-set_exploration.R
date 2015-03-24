@@ -47,7 +47,7 @@ ggplot(brickSetsPriced, aes(x = CPI, y = USAdjustedPrice)) +
 brickSetsPriced$priceAdjustment <- brickSetsPriced$USAdjustedPrice - brickSetsPriced$USRetailPrice
 hist(brickSetsPriced$priceAdjustment, breaks = 1000, xlim = c(-100,100))
 
-
+table(brickSetsPriced$pieces)
 
 # explore the brickSet set list ----
 tapply(brickSetsPriced$USRetailPrice, brickSetsPriced$year, mean)
