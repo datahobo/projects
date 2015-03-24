@@ -64,4 +64,20 @@ ggplot(brickSetsPriced, aes(x = wantedByTotal, y = USRetailPrice)) +
   geom_smooth(method = lm)
 ggplot(brickSetsPriced, aes(x = wantedByTotal, y = ownedByTotal)) +
   geom_point(shape = 1)
-  
+
+
+# match the brickSet and Peeron lists
+names(peeronSets) <- c("legoID", "name", "theme", "year", "pieces", "minifigs",
+                       "USRetailPrice", "inventory", "instructions")
+peeronSets$instructions <- ifelse(peeronSets$instructions == "Yes", 1, 0)
+peeronSetsPriced$instructions <- ifelse(peeronSetsPriced$instructions == "Yes", 1, 0)
+names(peeronSetsPriced) <- names(peeronSets)
+matchedPrices <- merge(brickSetsPriced, peeronSetsPriced, by.x = "legoID", by.y = "legoID")
+matchedSets <- as.data.frame(matchedPrices$legoID)
+names(matchedSets) <- c("legoID")
+matchedSets$matched <- TRUE
+
+peeronSetsPriced <- merge(peeronSetsPriced, matchedSets, all.x = TRUE)
+peeronSetsPricedNoPartsList <- subset(peeronSetsPriced, is.na(peeronSetsPriced$matched))
+
+table(brickSets$instructionsCount)

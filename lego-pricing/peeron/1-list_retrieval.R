@@ -50,7 +50,7 @@ dfr_peeronPartsList <- function (setIDString) {
   validSet <- (length(setPartsList) > 1 &
                  names(setPartsList)[1] != "NULL.V1")
   if(validSet) {
-    setPartsList$SetID <- setIDString  
+    setPartsList$SetID <- setIDString
     # Use the function to clean the data frame
     setPartsList <- dfr_cleanPeeronPartsList(setPartsList)
     # print(paste("Cleaned", setIDString))
