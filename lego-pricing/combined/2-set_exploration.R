@@ -79,5 +79,91 @@ matchedSets$matched <- TRUE
 
 peeronSetsPriced <- merge(peeronSetsPriced, matchedSets, all.x = TRUE)
 peeronSetsPricedNoPartsList <- subset(peeronSetsPriced, is.na(peeronSetsPriced$matched))
+rm(matchedSets)
+# now need to merge peeronSetsPricedNoPartsList into matchedPrices ----
+names(peeronSetsPricedNoPartsList) <- names(peeronSetsPriced)
+temp <- names(peeronSetsPricedNoPartsList)
+temp <- paste0(temp, ".y")
+temp[1] <- "legoID"
+temp
+names(peeronSetsPricedNoPartsList) <- temp
 
-table(brickSets$instructionsCount)
+# check for differences in the different sets
+temp <- setdiff(names(matchedPrices), names(peeronSetsPricedNoPartsList))
+match <- intersect(names(matchedPrices), names(peeronSetsPricedNoPartsList))
+p_only <- setdiff(names(peeronSetsPricedNoPartsList), match)
+names(peeronSetsPricedNoPartsList)[which(names(peeronSetsPricedNoPartsList) == "instructions.y")] <- "instructions"
+names(peeronSetsPricedNoPartsList)[which(names(peeronSetsPricedNoPartsList) == "matched.y")] <- "matched"
+names(peeronSetsPricedNoPartsList)[which(names(peeronSetsPricedNoPartsList) == "inventory.y")] <- "inventory"
+
+temp <- setdiff(names(matchedPrices), names(peeronSetsPricedNoPartsList))
+match <- intersect(names(matchedPrices), names(peeronSetsPricedNoPartsList))
+p_only <- setdiff(names(peeronSetsPricedNoPartsList), match)
+# now we can clean up the extra peeron list
+rm(p_only, match, temp, missingVars, i)
+peeronSetsPricedNoPartsList$matched <- NULL
+# now get the difference
+temp <- setdiff(names(matchedPrices), names(peeronSetsPricedNoPartsList))
+# now add each of those as a column
+for(i in 1:length(temp)) {
+  peeronSetsPricedNoPartsList[, length(peeronSetsPricedNoPartsList) + 1] <- NA
+  names(peeronSetsPricedNoPartsList)[length(peeronSetsPricedNoPartsList)] <- temp[i]  
+}
+# now reorder the names of peeron sets priced no parts list
+peeronSetsPricedNoPartsList <- peeronSetsPricedNoPartsList[names(matchedPrices)]
+
+pricedSets <- rbind(matchedPrices, peeronSetsPricedNoPartsList)
+rm(matchedPrices, peeronSetsPricedNoPartsList, peeronSetsPriced, brickSetsPriced, temp, i)
+write.csv(pricedSets, "pricedSets.csv")
+
+# now that we have the full list of priced sets and the parts list, let's see how we've done.
+setsWithParts <- data.frame(table(partsList$SetID))
+names(setsWithParts) <- c("legoID", "partsTypesCount")
+
+temp <- data.frame(pricedSets$legoID)
+names(temp) <- "legoID"
+temp$priced <- TRUE
+
+setsWithParts <- merge(setsWithParts, temp, all.x = TRUE)
+round(sum(setsWithParts$priced, na.rm = TRUE) / nrow(setsWithParts) * 100, 0)
+# pretty good - 98%
+rm(setsWithParts, temp)
+
+# now let's trim down the pricedSets frame ----
+pricedSets$X <- NULL
+pricedSets$number <- NULL
+pricedSets$numberVariant <- NULL
+pricedSets$bricksetURL <- NULL
+pricedSets$owned <- NULL
+pricedSets$wanted <- NULL
+pricedSets$qtyOwned <- NULL
+pricedSets$userNotes <- NULL
+pricedSets$ACMDataCount <- NULL
+pricedSets$UKRetailPrice <- NULL
+pricedSets$CARetailPrice <- NULL
+pricedSets$EURetailPrice <- NULL
+pricedSets$additionalImageCount <- NULL
+pricedSets$imageFilename <- NULL
+pricedSets$thumbnailURL <- NULL
+pricedSets$largeThumbnailURL <- NULL
+pricedSets$theme.y <- NULL
+pricedSets$EAN <- NULL
+pricedSets$UPC <- NULL
+pricedSets$instructions2 <- NULL
+pricedSets$instructions <- NULL
+
+names(pricedSets)
+str(pricedSets)
+pricedSets$compname <- pricedSets$name.x == pricedSets$name.y
+table(pricedSets$compname)
+pricedSets$compname <- NULL
+pricedSets$compyear <- pricedSets$year.x == pricedSets$year.y
+table(pricedSets$compyear)
+pricedSets$comppcs <- pricedSets$pieces.x == pricedSets$pieces.y
+table(pricedSets$comppcs)
+
+# pieces
+# minifigs
+# US Retail Price
+# Convert:
+# image

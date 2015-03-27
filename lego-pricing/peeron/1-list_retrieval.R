@@ -94,7 +94,7 @@ dfr_cleanPeeronSetList <- function (setList) {
   
   return(setList)  
 }
-# Now we move onto the interesting part, grabbing the list of all the sets...
+# Now we move onto the interesting part, grabbing the list of all the sets from peeron...
 peeronSets <- NULL
 for(i in 1:88) {
   # for(i in 1:1) {
