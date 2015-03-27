@@ -114,7 +114,6 @@ peeronSetsPricedNoPartsList <- peeronSetsPricedNoPartsList[names(matchedPrices)]
 
 pricedSets <- rbind(matchedPrices, peeronSetsPricedNoPartsList)
 rm(matchedPrices, peeronSetsPricedNoPartsList, peeronSetsPriced, brickSetsPriced, temp, i)
-write.csv(pricedSets, "pricedSets.csv")
 
 # now that we have the full list of priced sets and the parts list, let's see how we've done.
 setsWithParts <- data.frame(table(partsList$SetID))
@@ -154,16 +153,29 @@ pricedSets$instructions <- NULL
 
 names(pricedSets)
 str(pricedSets)
+# name
 pricedSets$compname <- pricedSets$name.x == pricedSets$name.y
 table(pricedSets$compname)
 pricedSets$compname <- NULL
+# year
 pricedSets$compyear <- pricedSets$year.x == pricedSets$year.y
 table(pricedSets$compyear)
+# pieces
 pricedSets$comppcs <- pricedSets$pieces.x == pricedSets$pieces.y
 table(pricedSets$comppcs)
-
-# pieces
+# Convert
+pricedSets$image <- as.logical(toupper(pricedSets$image))
 # minifigs
+pricedSets$compmfgs <- pricedSets$minifigs.x == pricedSets$minifigs.y
+table(pricedSets$compmfgs)
 # US Retail Price
-# Convert:
-# image
+table(!is.na(pricedSets$USRetailPrice.x))
+table(pricedSets$USRetailPrice.y)
+pricedSets$compprice <- pricedSets$USRetailPrice.x == pricedSets$USRetailPrice.y
+table(pricedSets$compprice)
+str(pricedSets)
+pricedSets$pricedifference <- pricedSets$USRetailPrice.x - pricedSets$USRetailPrice.y
+table(pricedSets$pricedifference)
+pricedSets$pricedifference <- NULL
+
+write.csv(pricedSets, "pricedSets.csv")
