@@ -173,9 +173,21 @@ table(!is.na(pricedSets$USRetailPrice.x))
 table(pricedSets$USRetailPrice.y)
 pricedSets$compprice <- pricedSets$USRetailPrice.x == pricedSets$USRetailPrice.y
 table(pricedSets$compprice)
+pricedSets$compprice <- NULL
 str(pricedSets)
 pricedSets$pricedifference <- pricedSets$USRetailPrice.x - pricedSets$USRetailPrice.y
 table(pricedSets$pricedifference)
 pricedSets$pricedifference <- NULL
 
+# plot some things ----
+# price and pieces
+ggplot(pricedSets, aes(x = pieces.x, y = USAdjustedPrice)) +
+  geom_point(shape = 1) + # use hollow circles
+  geom_smooth(method = lm) # show an lm line
+
+# now model it
+legoPricing <- lm(pricedSets$USAdjustedPrice ~ pricedSets$year.x + pricedSets$theme.x + pricedSets$themeGroup + pricedSets$subtheme +
+  pricedSets$pieces.x + pricedSets$minifigs.x + pricedSets$packagingType)
+
+summary(legoPricing)
 write.csv(pricedSets, "pricedSets.csv")
