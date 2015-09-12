@@ -1,0 +1,18 @@
+{
+    "contents" : "library('XML')\n\n# Need to read the library.xml file from the desktop\nlibrary.location <- \"~/Desktop\"\nlibrary.filename <- \"Library.xml\"\nlibrary.file <- paste(library.location, library.filename, sep = \"/\")\n\ntemp <- xmlParse(file = library.file)\n\nxml_data <- xmlToList(temp)\n",
+    "created" : 1442079980089.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1565241323",
+    "id" : "11CC4C94",
+    "lastKnownWriteTime" : 1442080415,
+    "path" : "~/Desktop/github/projects/tunes_library/1-import.R",
+    "project_path" : "1-import.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
